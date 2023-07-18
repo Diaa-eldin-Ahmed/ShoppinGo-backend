@@ -10,10 +10,15 @@ import {
   HttpStatus,
   UseGuards,
   Request,
+  SetMetadata,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from 'src/users/dto/signIn.dto';
-import { AuthGuard } from './auth.guard';
+
+export const IS_PUBLIC_KEY = 'isPublic';
+export function SkipAuth() {
+  return SetMetadata(IS_PUBLIC_KEY, true);
+}
 
 @Controller('auth')
 export class AuthController {
@@ -24,10 +29,14 @@ export class AuthController {
   signIn(@Body() signInDto: SignInDto) {
     return this.authService.signIn(signInDto.username, signInDto.password);
   }
-
-  @UseGuards(AuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
+  }
+
+  @SkipAuth()
+  @Get('public')
+  publicRoute() {
+    return 'This is a public route';
   }
 }
