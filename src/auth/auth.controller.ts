@@ -3,12 +3,8 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   HttpCode,
   HttpStatus,
-  UseGuards,
   Request,
   SetMetadata,
   BadGatewayException,
@@ -21,6 +17,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { InvalidCredentialsException } from './auth.exceptions';
 
 export const IS_PUBLIC_KEY = 'isPublic';
 export function SkipAuth() {
@@ -38,11 +35,21 @@ export class AuthController {
   @ApiBearerAuth('JWT-auth')
   @ApiResponse({ status: 201 })
   @ApiBadRequestResponse({ type: BadGatewayException })
-  signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+  async signIn(@Body() signInDto: SignInDto) {
+    try {
+      return await this.authService.signIn(
+        signInDto.username,
+        signInDto.password,
+      );
+    } catch (error) {
+      if (error instanceof InvalidCredentialsException) {
+        return `authentication failed: ${error.message}`;
+      }
+    }
   }
 
   @Get('profile')
+  @ApiBearerAuth('JWT-auth')
   getProfile(@Request() req) {
     return req.user;
   }
@@ -51,5 +58,18 @@ export class AuthController {
   @Get('public')
   publicRoute() {
     return 'This is a public route';
+  }
+
+  @Post('logout')
+  async logout(@Request() req) {
+    const token = req.headers.authorization.split(' ')[1];
+    console.log(token);
+    // Implement the logout logic
+    // Revoke the access token associated with the user
+    await this.authService.revokeAccessToken(token);
+    // Remove the token from the database or cache
+    await this.authService.removeFromTokenCache(token);
+    // Return a success response
+    return { message: 'Logout successful' };
   }
 }

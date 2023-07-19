@@ -16,7 +16,7 @@ import { APP_GUARD } from '@nestjs/core';
       // secret: 'secret',
       global: true,
       secret: jwtConstants.secret,
-      // signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '2h' },
     }),
   ],
   controllers: [AuthController],
