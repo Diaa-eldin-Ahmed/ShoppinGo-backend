@@ -5,10 +5,15 @@ import { InvalidCredentialsException } from './auth.exceptions';
 
 @Injectable()
 export class AuthService {
+  removeFromTokenCache(token: any) {
+    throw new Error('Method not implemented.');
+  }
+  revokeAccessToken(token: any) {
+    throw new Error('Method not implemented.');
+  }
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService,
-    private readonly cacheService: CacheService,
+    private jwtService: JwtService, // private readonly cacheService: CacheService,
   ) {}
 
   async signIn(username, pass) {
